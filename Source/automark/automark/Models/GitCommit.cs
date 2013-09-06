@@ -36,5 +36,7 @@ namespace automark.Models
                 Console.WriteLine(file.Status + "\t" + file.File);
             }
         }
+
+        public string UnifiedDiff { get; set; }
     }
 }

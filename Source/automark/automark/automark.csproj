@@ -41,8 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Git\GitDiffParser.cs" />
     <Compile Include="Models\GitCommit.cs" />
+    <Compile Include="Models\GitFileDiff.cs" />
     <Compile Include="Models\GitFileStatus.cs" />
+    <Compile Include="Models\HunkRange.cs" />
+    <Compile Include="Models\HunkRangeInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\Config.cs" />

@@ -18,11 +18,23 @@ namespace automark
             var output = GitCommands.ListShaWithFiles(path);
 
             var parser = new ParseGitLog();
+            var diffParser = new GitDiffParser();
             var commits = parser.Parse(output);
 
             Console.WriteLine(commits.Count);
             foreach (var commit in commits)
             {
+                commit.UnifiedDiff = GitCommands.ShowSha(path, commit.Sha);
+                diffParser.Parse(commit.UnifiedDiff);
+
+                foreach (var file in commit.Files)
+                {
+                    if( file.Status != "A" )
+                        file.BeforeText = GitCommands.ShowFileBeforeCommit(path, commit.Sha, file.File);
+                    if( file.Status != "D" )
+                        file.AfterText = GitCommands.ShowFileAfterCommit(path, commit.Sha, file.File);
+                }
+
                 commit.Print();
             }
 

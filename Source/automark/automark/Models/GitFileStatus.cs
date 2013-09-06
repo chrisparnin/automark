@@ -10,5 +10,9 @@ namespace automark.Models
     {
         public string Status { get; set; }
         public string File { get; set; }
+
+        public string BeforeText { get; set; }
+
+        public string AfterText { get; set; }
     }
 }
