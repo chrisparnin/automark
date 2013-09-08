@@ -13,6 +13,7 @@ namespace automark
         static void Main(string[] args)
         {
             string path = @"C:\DEV\github\Codegrams";
+            //string path = @"C:\Users\Chris\Documents\Visual Studio 2012\Projects\WebApplication1\.HistoryData\LocalHistory";
             if (args.Length > 0)
                 path = args[0];
             var output = GitCommands.ListShaWithFiles(path);

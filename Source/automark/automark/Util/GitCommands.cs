@@ -21,6 +21,7 @@ namespace automark.Util
             // Redirect the output stream of the child process.
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
+            //p.StartInfo.RedirectStandardError = true;
             p.StartInfo.FileName = Config.GitExectuable;
             p.StartInfo.Arguments = command;
             p.Start();
@@ -30,37 +31,39 @@ namespace automark.Util
             // Read the output stream first and then wait.
             string output = p.StandardOutput.ReadToEnd();
             p.WaitForExit();
+            //string error = p.StandardError.ReadToEnd();
+            //p.WaitForExit();
             return output;
         }
 
         public static string ListSha(string path)
         {
-            var output = RunProcess(string.Format(" --git-dir={0}/.git --work-tree={1} log --name-only", path.Replace("\\", "/"), path.Replace("\\", "/")));
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" log --name-only", path.Replace("\\", "/"), path.Replace("\\", "/")));
             return output;
         }
 
         public static string ListShaWithFiles(string path)
         {
-            var output = RunProcess(string.Format(" --git-dir={0}/.git --work-tree={1} log --name-status", path.Replace("\\", "/"), path.Replace("\\", "/")));
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" log --name-status", path.Replace("\\", "/"), path.Replace("\\", "/")));
             return output;
         }
 
 
         public static string ShowSha(string path, string sha)
         {
-            var output = RunProcess(string.Format(" --git-dir={0}/.git --work-tree={1} show {2}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha));
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha));
             return output;
         }
 
         public static string ShowFileAfterCommit(string path, string sha, string file)
         {
-            var output = RunProcess(string.Format(" --git-dir={0}/.git --work-tree={1} show {2}:{3}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha, file));
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2}:{3}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha, file));
             return output;
         }
 
         public static string ShowFileBeforeCommit(string path, string sha, string file)
         {
-            var output = RunProcess(string.Format(" --git-dir={0}/.git --work-tree={1} show {2}~1:{3}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha, file));
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2}~1:{3}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha, file));
             return output;
         }
     }
