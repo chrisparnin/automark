@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,12 @@ namespace automark.Git
 {
     class ParseGitLog
     {
+        public static DateTime GetDateFromGitFormat(string dateStr)
+        {
+            string format = "ddd MMM d HH:mm:ss yyyy zzz";
+            return DateTimeOffset.ParseExact(dateStr, format, CultureInfo.InvariantCulture).DateTime;
+        }
+
         public List<GitCommit> Parse(string output)
         {
             GitCommit commit = null;
@@ -44,7 +51,8 @@ namespace automark.Git
                         processingMessage = !processingMessage;
                     }
 
-                    if (line.Length > 0 && line[0] == '\t')
+                    if (line.Length > 0 && line[0] == '\t' || 
+                       (line.Length > 4 && line.Substring(0,4).All( ch => ch == ' ') ) )
                     { 
                         // commit message.
                         commit.Message += line;

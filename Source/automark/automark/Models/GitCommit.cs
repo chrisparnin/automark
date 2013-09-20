@@ -13,12 +13,15 @@ namespace automark.Models
             Headers = new Dictionary<string, string>();
             Files = new List<GitFileStatus>();
             Message = "";
+            Visits = new List<WebVisit>();
         }
 
         public Dictionary<string, string> Headers { get; set; }
         public string Sha { get; set; }
         public string Message { get; set; }
         public List<GitFileStatus> Files { get; set; }
+
+        public List<WebVisit> Visits { get; set; }
 
 
         public void Print()
@@ -38,5 +41,7 @@ namespace automark.Models
         }
 
         public string UnifiedDiff { get; set; }
+
+        public List<FileDiff> Difflets { get; set; }
     }
 }
