@@ -27,6 +27,8 @@ namespace automark.Git
                 do
                 {
                     var line = strReader.ReadLine();
+                    if (line == null)
+                        break;
 
                     if( line.StartsWith("commit ") )
                     {
