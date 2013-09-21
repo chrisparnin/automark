@@ -26,6 +26,15 @@ allow developers to focus on the learning experiences and narrative of a blog po
 - Option to generate failed attempts to get a code snippet to work (and ultimate final solution).
 
 
+#### Review Mode
+
+Markdown is generated to show unified diffs.
+![ReviewMode](https://raw.github.com/chrisparnin/automark/master/Doc/ReviewMode.png)
+
+#### Share Mode
+
+**In the works:** Format more suitable for sharing recent coding history.
+
 ### Future Features
 
 - Natural language summaries of code snippets.
