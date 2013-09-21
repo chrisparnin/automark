@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using automark.Models;
 using automark.Util;
+using System.Data.SQLite;
 
 namespace automark.Connections.Browser
 {
@@ -29,33 +30,38 @@ namespace automark.Connections.Browser
 
         public List<WebVisit> RecentStackoverflow(string dbPath)
         {
-            var connection = new System.Data.SQLite.SQLiteConnection("Data Source=" + dbPath);
-            connection.Open();
-
             var list = new List<WebVisit>();
-
-            var command =
-                @"SELECT urls.url, visits.visit_time, urls.title
+            using (var connection = new System.Data.SQLite.SQLiteConnection("Data Source=" + dbPath + ";Version=3;Read Only=True"))
+            {
+                connection.Open();
+                
+                var command =
+                    @"SELECT urls.url, visits.visit_time, urls.title
                   FROM visits, urls
                   WHERE visits.url = urls.id AND urls.url LIKE '%stackoverflow%'
                 ";
 
-            using (var c = connection.CreateCommand())
-            {
-                c.CommandText = command;
-                var reader = c.ExecuteReader();
-                while (reader.Read())
+                using (var c = connection.CreateCommand())
                 {
-                    var url = reader.GetString(0);
-                    var timeEpoch = reader.GetInt64(1) / 1000;
-                    var visitTime = FromGoogleTime(timeEpoch);
-                    var title = reader.GetString(2);
-                    list.Add(new WebVisit() { Url = url, Timestamp = visitTime, Title = title });
+                    c.CommandText = command;
+                    var reader = c.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        var url = reader.GetString(0);
+                        var timeEpoch = reader.GetInt64(1) / 1000;
+                        var visitTime = FromGoogleTime(timeEpoch);
+                        var title = reader.GetString(2);
+                        list.Add(new WebVisit() { Url = url, Timestamp = visitTime, Title = title });
+                    }
                 }
+                connection.Close();
             }
+           
 
             return list;
         }
+
+
 
         public DateTime FromUnixTime(long unixTime)
         {
@@ -66,7 +72,7 @@ namespace automark.Connections.Browser
         public DateTime FromGoogleTime(long unixTime)
         {
             var epoch = new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            return epoch.AddMilliseconds(unixTime);
+            return epoch.AddMilliseconds(unixTime).ToLocalTime();
         }
 
 

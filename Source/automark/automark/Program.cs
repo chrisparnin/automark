@@ -14,7 +14,8 @@ namespace automark
     {
         static void Main(string[] args)
         {
-            string path = @"C:\Users\Chris\AppData\Roaming\autogit";
+            string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autogit");
+            path = @"C:\dev\automark\Source\automark\.HistoryData\LocalHistory";
             if (args.Length > 0)
                 path = args[0];
             var output = GitCommands.ListShaWithFiles(path);
@@ -47,21 +48,34 @@ namespace automark
 
             var connector = new ChromeHistory();
 
-            string dbPath = @"C:\Users\Chris\AppData\Local\Google\Chrome\User Data\Default\History";
+            //string dbPath = @"C:\Users\Chris\AppData\Local\Google\Chrome\User Data\Default\History";
+            string dbPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome\User Data\Default\History");
             //string dbPath = @"\\psf\Home\Library\Application Support\Google\Chrome\Default\History"
-            // TODO: database is locked.
             if (System.IO.File.Exists(dbPath))
             {
-                var visits = connector.RecentStackoverflow(dbPath);
-                var previous = commits.FirstOrDefault();
+                // Chrome keeps an exclusive lock on database while open; copy-local
+                var tempPath = "tempHistory.db";
+                System.IO.File.Copy(dbPath, tempPath, true);
+
+                var visits = connector.RecentStackoverflow(tempPath);
+                var last = commits.FirstOrDefault();
                 foreach (var commit in commits.Skip(1) )
                 {
-                    var previousTime = ParseGitLog.GetDateFromGitFormat( previous.Headers["Date"] );
+                    var lastTime = ParseGitLog.GetDateFromGitFormat(last.Headers["Date"]);
                     var commitTime = ParseGitLog.GetDateFromGitFormat( commit.Headers["Date"] );
 
-                    commit.Visits.AddRange( visits.Where( v => v.Timestamp > previousTime && v.Timestamp <= commitTime ) );
-                    previous = commit;
+                    commit.Visits.AddRange(visits.Where(v => v.Timestamp < lastTime && v.Timestamp >= commitTime));
+                    last = commit;
                 }
+
+                // Clean up
+                GC.Collect();
+                connector = null;
+                new System.Threading.Thread((db) =>
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    System.IO.File.Delete((string)db);
+                }).Start(tempPath);
             }
 
             var formatter = new AsMarkdown();
