@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using automark.Git;
 
 namespace automark.Models
 {
@@ -23,6 +25,21 @@ namespace automark.Models
 
         public List<WebVisit> Visits { get; set; }
 
+        public DateTime CommitTimeStamp
+        {
+            get 
+            {
+                try
+                {
+                    return ParseGitLog.GetDateFromGitFormat( Headers["Date"] );
+                }
+                catch( Exception ex)
+                {
+                    Trace.WriteLine(ex.Message);
+                    return DateTime.MaxValue;
+                }
+            }
+        }
 
         public void Print()
         {

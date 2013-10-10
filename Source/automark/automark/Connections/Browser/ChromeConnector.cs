@@ -45,18 +45,22 @@ namespace automark.Connections.Browser
                 {
                     c.CommandText = command;
                     var reader = c.ExecuteReader();
+                    var urls = new HashSet<string>();
                     while (reader.Read())
                     {
                         var url = reader.GetString(0);
                         var timeEpoch = reader.GetInt64(1) / 1000;
                         var visitTime = FromGoogleTime(timeEpoch);
                         var title = reader.GetString(2);
-                        list.Add(new WebVisit() { Url = url, Timestamp = visitTime, Title = title });
+                        if (!urls.Contains(url))
+                        {
+                            list.Add(new WebVisit() { Url = url, Timestamp = visitTime, Title = title });
+                        }
+                        urls.Add(url);
                     }
                 }
                 connection.Close();
             }
-           
 
             return list;
         }
