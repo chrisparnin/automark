@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "automark.VisualStudio", "automark.VisualStudio\automark.VisualStudio.csproj", "{F598685E-40AD-48F5-B0C5-CDF6F0D6152E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "automark", "..\..\automark\automark\automark.csproj", "{E069A042-1D74-4A2F-B023-61B98608F002}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F598685E-40AD-48F5-B0C5-CDF6F0D6152E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F598685E-40AD-48F5-B0C5-CDF6F0D6152E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F598685E-40AD-48F5-B0C5-CDF6F0D6152E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F598685E-40AD-48F5-B0C5-CDF6F0D6152E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E069A042-1D74-4A2F-B023-61B98608F002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E069A042-1D74-4A2F-B023-61B98608F002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E069A042-1D74-4A2F-B023-61B98608F002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E069A042-1D74-4A2F-B023-61B98608F002}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(CodealikeProperties) = postSolution
+		SolutionGuid = 3ac06b91-7281-4447-aed5-7e53d0dc8400
+	EndGlobalSection
+EndGlobal
