@@ -14,7 +14,6 @@ namespace automark.Generate.Export
     {
         public string Export(List<GitCommit> commits)
         {
-            // TODO Escape certain html... e.g. <p> is not being escaped in code.
             if (!commits.Any())
                 return "";
 
@@ -66,7 +65,7 @@ namespace automark.Generate.Export
                     {
                         foreach (var line in hunk.DiffLines)
                         {
-                            w.WriteLine("    {0}", line.TrimEnd());
+                            w.WriteLine("    {0}", line.TrimEnd() );
                         }
                     }
                 }
@@ -76,9 +75,10 @@ namespace automark.Generate.Export
             }
             return w.ToString();
         }
+
         // TODO possible to introduce navigation helper, sidebar.?
         // TODO better summary/header the amount of commits, date range.
-
+        // TODO collapsible sections (via javascript).
         private string EmitTime(DateTime date)
         {
             //Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("sv-SE");
