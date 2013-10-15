@@ -21,8 +21,10 @@ namespace automark.Models
             DiffLines = diffLines.Take(lines).ToList();
             this.FileName = fileName;
 
-            IsAddition = DiffLines.All(s => s.StartsWith("+") || string.IsNullOrWhiteSpace(s));
-            IsDeletion = DiffLines.All(s => s.StartsWith("-") || string.IsNullOrWhiteSpace(s));
+            var addedLines = DiffLines.Where(s => s.StartsWith("+")).Count();
+            var deletedLines = DiffLines.Where(s => s.StartsWith("-")).Count();
+            IsAddition = addedLines > 0 && deletedLines == 0;
+            IsDeletion = deletedLines > 0 && addedLines == 0;
             IsModification = !IsAddition && !IsDeletion;
 
             if (IsDeletion || IsModification)

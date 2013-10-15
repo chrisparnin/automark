@@ -173,7 +173,7 @@ namespace ninlabs.automark.VisualStudio
                 return;
             }
 
-            string tempMD =string.Format("automark-{0:yyyy-MM-dd-tt}.md", DateTime.Now);
+            string tempMD =string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.md", DateTime.Now);
             System.IO.File.WriteAllText(tempMD, builder.ToString());
             System.Diagnostics.Process.Start(tempMD);
         }

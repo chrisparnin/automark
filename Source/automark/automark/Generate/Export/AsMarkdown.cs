@@ -65,6 +65,12 @@ namespace automark.Generate.Export
                     {
                         foreach (var line in hunk.DiffLines)
                         {
+                            // Skip changes to newlines.
+                            if (hunk.IsAddition || hunk.IsDeletion)
+                            {
+                                if (line.Trim() == "+" || line.Trim() == "-")
+                                    continue;
+                            }
                             w.WriteLine("    {0}", line.TrimEnd() );
                         }
                     }

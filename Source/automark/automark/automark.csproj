@@ -53,6 +53,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Connections\Browser\ChromeConnector.cs" />
+    <Compile Include="Connections\Browser\FirefoxConnector.cs" />
+    <Compile Include="Connections\Browser\SqlLiteConnector.cs" />
     <Compile Include="Generate\Export\AsMarkdown.cs" />
     <Compile Include="Generate\Export\AsMarkdownHtml.cs" />
     <Compile Include="Git\GitDiffParser.cs" />
