@@ -17,8 +17,14 @@ namespace automark
         {
             string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autogit");
             path = @"C:\dev\github\automark\Source\automark\.HistoryData\LocalHistory";
+            var reverse = false;
             if (args.Length > 0)
                 path = args[0];
+            if (args.Any(a => a == "-r"))
+            {
+                reverse = true;
+            }
+
             var output = GitCommands.ListShaWithFiles(path);
 
             var parser = new ParseGitLog();
@@ -74,6 +80,11 @@ namespace automark
 
 
             var formatter = new AsMarkdown();
+
+            if (reverse)
+            {
+                commits.Reverse();
+            }
             Console.WriteLine(formatter.Export(commits));
 
             //var html = new AsMarkdownHtml();
