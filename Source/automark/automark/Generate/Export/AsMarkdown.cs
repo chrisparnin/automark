@@ -39,20 +39,26 @@ namespace automark.Generate.Export
                 }
                 // Sunday, October 6 2013
                 // 10:44 AM
-                if (span != TimeSpan.MaxValue && span.TotalHours > 2)
-                {
-                    w.WriteLine("<div class='divider'></div>");
-                    w.WriteLine(EmitTime(commit.CommitTimeStamp));                    
-                }
+                //if (span != TimeSpan.MaxValue && span.TotalHours > 2)
+                //{
+                //    w.WriteLine("<div class='divider'></div>");
+                //    w.WriteLine(EmitTime(commit.CommitTimeStamp));                    
+                //}
 
                 if( commit.Visits.Any() )
                 {
-                    w.WriteLine("#### Visited ");
+                    //w.WriteLine("#### Visited ");
+                    w.WriteLine("   ");
                     foreach (var visit in commit.Visits)
                     {
                         w.WriteLine("* [{0}]({1})",
                             string.IsNullOrEmpty(visit.Title) ? visit.Url : visit.Title,
                             visit.Url);
+                    }
+                    w.WriteLine("   ");
+                    if (commit.Visits.Count == 1)
+                    {
+                        w.WriteLine("<div></div>");
                     }
                 }
 
@@ -65,12 +71,11 @@ namespace automark.Generate.Export
                     {
                         foreach (var line in hunk.DiffLines)
                         {
-                            // Skip changes to newlines.
-                            if (hunk.IsAddition || hunk.IsDeletion)
-                            {
-                                if (line.Trim() == "+" || line.Trim() == "-")
-                                    continue;
-                            }
+                            // http://stackoverflow.com/questions/8301207/microsoft-ides-source-file-encodings-boms-and-the-unicode-character-ufeff
+                            // default filter: skip context of adding using.
+                            if (line.Trim().StartsWith("using ") )
+                                continue;
+
                             w.WriteLine("    {0}", line.TrimEnd() );
                         }
                     }

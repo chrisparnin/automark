@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using System.Reflection;
 using System.Text;
+using ninlabs.Ganji_History.Listeners;
 
 namespace ninlabs.automark.VisualStudio
 {
@@ -40,7 +41,8 @@ namespace ninlabs.automark.VisualStudio
         private uint m_solutionCookie = 0;
         private EnvDTE.DTE m_dte;
         private string m_localHistoryPath = "";
-
+        public static Log Log { get; set; }
+        public NavigateListener m_navigateListener = new NavigateListener();
         /// <summary>
         /// Default constructor of the package.
         /// Inside this method you can place any initialization code that does not require 
@@ -51,8 +53,7 @@ namespace ninlabs.automark.VisualStudio
         public automarkVisualStudioPackage()
         {
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
-
-            // TODO add basic tracing of time of opening solution, and cursor movements.
+            Log = new Log();
         }
 
         /// <summary>
@@ -96,6 +97,23 @@ namespace ninlabs.automark.VisualStudio
                 CommandID menuCommandID = new CommandID(GuidList.guidautomarkVisualStudioCmdSet, (int)PkgCmdIDList.cmdidAutomark);
                 MenuCommand menuItem = new MenuCommand(MenuItemCallback, menuCommandID );
                 mcs.AddCommand( menuItem );
+
+                // Create the command for the menu item.
+                menuCommandID = new CommandID(GuidList.guidautomarkVisualStudioCmdSet, (int)PkgCmdIDList.cmdidAutomarkReverse);
+                menuItem = new MenuCommand(MenuItemCallback, menuCommandID);
+                mcs.AddCommand(menuItem);
+
+                // Create the command for the menu item.
+                menuCommandID = new CommandID(GuidList.guidautomarkVisualStudioCmdSet, (int)PkgCmdIDList.cmdidAutomarkHtml);
+                menuItem = new MenuCommand(MenuItemCallback, menuCommandID);
+                mcs.AddCommand(menuItem);
+
+                // Create the command for the menu item.
+                menuCommandID = new CommandID(GuidList.guidautomarkVisualStudioCmdSet, (int)PkgCmdIDList.cmdidAutomarkHtmlReverse);
+                menuItem = new MenuCommand(MenuItemCallback, menuCommandID);
+                mcs.AddCommand(menuItem);
+
+
                 // Create the command for the tool window
                 CommandID toolwndCommandID = new CommandID(GuidList.guidautomarkVisualStudioCmdSet, (int)PkgCmdIDList.cmdidAutomarkWindow);
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
@@ -116,15 +134,34 @@ namespace ninlabs.automark.VisualStudio
         {
             try
             {
-                RunAutomark();
+                string flags = "";
+                var command = sender as MenuCommand;
+                if (command != null)
+                {
+                    if (command.CommandID.ID == PkgCmdIDList.cmdidAutomarkReverse)
+                    {
+                        flags = " -r";
+                    }
+                    if (command.CommandID.ID == PkgCmdIDList.cmdidAutomarkHtml)
+                    {
+                        flags = " -html";
+                    }
+                    if (command.CommandID.ID == PkgCmdIDList.cmdidAutomarkHtmlReverse)
+                    {
+                        flags = " -r -html";
+                    }
+                }
+                RunAutomark(flags);
+                Log.WriteMessage(string.Format("automarkcmd;{0}{1}", DateTime.Now, flags));
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(string.Format("ERROR: Running automark {0}", ex.Message));
+                Log.WriteMessage(string.Format("ERROR: Running automark {0}", ex.Message));
             }
         }
 
-        private void RunAutomark()
+        private void RunAutomark(string flags)
         {
             string path = (new System.Uri(Assembly.GetExecutingAssembly().CodeBase)).AbsolutePath;
             string directory = System.IO.Path.GetDirectoryName(path);
@@ -148,7 +185,7 @@ namespace ninlabs.automark.VisualStudio
             startInfo.RedirectStandardError = true;
             startInfo.UseShellExecute = false;
             startInfo.FileName = executable;
-            startInfo.Arguments = '"' + m_localHistoryPath + '"';
+            startInfo.Arguments = '"' + m_localHistoryPath + '"' + flags;
             process.StartInfo = startInfo;
             process.Start();
 
@@ -173,9 +210,20 @@ namespace ninlabs.automark.VisualStudio
                 return;
             }
 
-            string tempMD =string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.md", DateTime.Now);
-            System.IO.File.WriteAllText(tempMD, builder.ToString());
-            System.Diagnostics.Process.Start(tempMD);
+            if (flags.Contains("html"))
+            {
+                string tempHtml = string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.html", DateTime.Now);
+                System.IO.File.WriteAllText(tempHtml, builder.ToString());
+                Log.WriteMessage(string.Format("automarkresult;{0};{1}", tempHtml, DateTime.Now));
+                System.Diagnostics.Process.Start(tempHtml);
+            }
+            else 
+            {
+                string tempMD = string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.md", DateTime.Now);
+                System.IO.File.WriteAllText(tempMD, builder.ToString());
+                Log.WriteMessage(string.Format("automarkresult;{0};{1}", tempMD, DateTime.Now));
+                System.Diagnostics.Process.Start(tempMD);
+            }
         }
 
         private void ShowMessage(string title, string message)
@@ -228,6 +276,9 @@ namespace ninlabs.automark.VisualStudio
             if (m_dte == null)
                 ErrorHandler.ThrowOnFailure(1);
 
+
+            m_navigateListener.Register(m_dte);
+
             var solutionBase = "";
             var solutionName = "";
             if (m_dte.Solution != null)
@@ -236,6 +287,8 @@ namespace ninlabs.automark.VisualStudio
                 solutionName = System.IO.Path.GetFileNameWithoutExtension(m_dte.Solution.FullName);
             }
             m_localHistoryPath = FindLocalHistoryPath();
+
+
         }
 
         private string FindLocalHistoryPath()
@@ -246,6 +299,9 @@ namespace ninlabs.automark.VisualStudio
                 basePath = System.IO.Path.GetDirectoryName(m_dte.Solution.FullName);
             }
             basePath = System.IO.Path.Combine(basePath, ".HistoryData");
+
+            Log.LogPath = System.IO.Path.Combine(basePath, "usage.log");
+
             var contextPath = System.IO.Path.Combine(basePath, "LocalHistory");
 
             return contextPath;
@@ -258,6 +314,8 @@ namespace ninlabs.automark.VisualStudio
 
         public int OnBeforeCloseSolution(object pUnkReserved)
         {
+            Log.Flush();
+            m_navigateListener.Shutdown();
             return VSConstants.S_OK;
         }
 

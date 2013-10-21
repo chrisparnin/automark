@@ -17,8 +17,16 @@ namespace automark.Generate.Export
             var markdown = formatter.Export(commits);
 
             var markdown2Html = new Markdown();
+            //markdown2Html.EncodeProblemUrlCharacters = true;
             var html = markdown2Html.Transform(markdown);
-            return html;
+
+            var template = File.ReadAllText("Generate/Export/PostTemplate.html");
+
+            var res =  template + "<body>" + html + "</body></html>";
+            return res;
+            // Remove BOM that Visual Studio places in files.
+            //return res.Replace("ï»¿", "");
+            //return res.Replace("\uEFBBBF", "");
         }
 
         public void ExportToFile(List<GitCommit> commits, string outputPath)
