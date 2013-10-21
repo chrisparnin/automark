@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using automark.Models;
@@ -20,10 +21,20 @@ namespace automark.Generate.Export
             //markdown2Html.EncodeProblemUrlCharacters = true;
             var html = markdown2Html.Transform(markdown);
 
-            var template = File.ReadAllText("Generate/Export/PostTemplate.html");
+            string path = (new System.Uri(Assembly.GetExecutingAssembly().CodeBase)).AbsolutePath;
+            string directory = System.IO.Path.GetDirectoryName(path);
+            string templatePath = System.IO.Path.Combine(directory, "Generate", "Export", "PostTemplate.html");
 
-            var res =  template + "<body>" + html + "</body></html>";
-            return res;
+            if (File.Exists(templatePath))
+            {
+                var template = File.ReadAllText(templatePath);
+                var res = template + "<body>" + html + "</body></html>";
+                return res;
+            }
+            else
+            { 
+                return "<html><body>" + html + "</body></html>";
+            }
             // Remove BOM that Visual Studio places in files.
             //return res.Replace("ï»¿", "");
             //return res.Replace("\uEFBBBF", "");

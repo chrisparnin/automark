@@ -41,6 +41,7 @@ namespace ninlabs.automark.VisualStudio
         private uint m_solutionCookie = 0;
         private EnvDTE.DTE m_dte;
         private string m_localHistoryPath = "";
+        private string m_basePath = "";
         public static Log Log { get; set; }
         public NavigateListener m_navigateListener = new NavigateListener();
         /// <summary>
@@ -210,16 +211,29 @@ namespace ninlabs.automark.VisualStudio
                 return;
             }
 
+             
             if (flags.Contains("html"))
             {
-                string tempHtml = string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.html", DateTime.Now);
+                string tempHtml = System.IO.Path.Combine(m_basePath,"html",string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.html", DateTime.Now));
+                var parent = System.IO.Path.GetDirectoryName(tempHtml);
+                if (!System.IO.Directory.Exists(parent))
+                {
+                    System.IO.Directory.CreateDirectory(parent);
+                }
+
                 System.IO.File.WriteAllText(tempHtml, builder.ToString());
                 Log.WriteMessage(string.Format("automarkresult;{0};{1}", tempHtml, DateTime.Now));
                 System.Diagnostics.Process.Start(tempHtml);
             }
             else 
             {
-                string tempMD = string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.md", DateTime.Now);
+                string tempMD = System.IO.Path.Combine(m_basePath,"md",string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.md", DateTime.Now));
+                var parent = System.IO.Path.GetDirectoryName(tempMD);
+                if (!System.IO.Directory.Exists(parent))
+                {
+                    System.IO.Directory.CreateDirectory(parent);
+                }
+
                 System.IO.File.WriteAllText(tempMD, builder.ToString());
                 Log.WriteMessage(string.Format("automarkresult;{0};{1}", tempMD, DateTime.Now));
                 System.Diagnostics.Process.Start(tempMD);
@@ -300,6 +314,7 @@ namespace ninlabs.automark.VisualStudio
             }
             basePath = System.IO.Path.Combine(basePath, ".HistoryData");
 
+            m_basePath = basePath;
             Log.LogPath = System.IO.Path.Combine(basePath, "usage.log");
 
             var contextPath = System.IO.Path.Combine(basePath, "LocalHistory");

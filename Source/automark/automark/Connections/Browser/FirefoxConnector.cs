@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace automark.Connections.Browser
         public override List<WebVisit> RecentStackoverflow(string dbPath)
         {
             var list = new List<WebVisit>();
-            using (var connection = new System.Data.SQLite.SQLiteConnection("Data Source=" + dbPath + ";Version=3;Read Only=True"))
+             using (var connection = new System.Data.SQLite.SQLiteConnection("Data Source=" + dbPath + ";Version=3;Read Only=True"))
             {
                 connection.Open();
 
@@ -48,13 +49,20 @@ namespace automark.Connections.Browser
 
         public string FindDbPath()
         {
-            string ffPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Mozilla\Firefox\Profiles\");
-            // [profile]\places.sqlite
-            foreach (var profile in System.IO.Directory.EnumerateDirectories(ffPath))
+            try
             {
-                var db = System.IO.Path.Combine( ffPath, profile, "places.sqlite" );
-                if (System.IO.File.Exists(db))
-                    return db;
+                string ffPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Mozilla\Firefox\Profiles\");
+                // [profile]\places.sqlite
+                foreach (var profile in System.IO.Directory.EnumerateDirectories(ffPath))
+                {
+                    var db = System.IO.Path.Combine(ffPath, profile, "places.sqlite");
+                    if (System.IO.File.Exists(db))
+                        return db;
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.Write(ex.Message);
             }
             return null;
         }

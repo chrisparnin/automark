@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -109,20 +110,27 @@ namespace automark
             var visits = new List<WebVisit>();
             if (System.IO.File.Exists(dbPath))
             {
-                // Chrome keeps an exclusive lock on database while open; copy-local
-                var tempPath = tempName;
-                System.IO.File.Copy(dbPath, tempPath, true);
-
-                visits = connector.RecentStackoverflow(tempPath);
-
-                // Clean up
-                GC.Collect();
-                connector = null;
-                new System.Threading.Thread((db) =>
+                try
                 {
-                    System.Threading.Thread.Sleep(1000);
-                    System.IO.File.Delete((string)db);
-                }).Start(tempPath);
+                    // Chrome keeps an exclusive lock on database while open; copy-local
+                    var tempPath = tempName;
+                    System.IO.File.Copy(dbPath, tempPath, true);
+
+                    visits = connector.RecentStackoverflow(tempPath);
+
+                    // Clean up
+                    GC.Collect();
+                    connector = null;
+                    new System.Threading.Thread((db) =>
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                        System.IO.File.Delete((string)db);
+                    }).Start(tempPath);
+                }
+                catch (Exception ex)
+                {
+                    Trace.Write(ex.Message);
+                }
             }
             return visits;
         }
