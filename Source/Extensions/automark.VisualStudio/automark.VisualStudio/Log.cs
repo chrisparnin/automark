@@ -16,7 +16,7 @@ namespace ninlabs.automark.VisualStudio
         public void WriteMessage(string message)
         {
             // Throttled write.
-            if ((lastWrite - DateTime.Now).TotalMinutes > 1)
+            if ((DateTime.Now - lastWrite ).TotalMinutes > 1 || Buffer.Count > 500)
             {
                 WriteBuffer();
                 Write(message);

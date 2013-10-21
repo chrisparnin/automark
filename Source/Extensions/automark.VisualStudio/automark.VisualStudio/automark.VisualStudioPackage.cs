@@ -152,7 +152,7 @@ namespace ninlabs.automark.VisualStudio
                     }
                 }
                 RunAutomark(flags);
-                Log.WriteMessage(string.Format("automarkcmd;{0}{1}", DateTime.Now, flags));
+                Log.WriteMessage(string.Format("automarkcmd;{0};{1}", DateTime.Now, flags));
             }
             catch (Exception ex)
             {
