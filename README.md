@@ -25,6 +25,8 @@ Example output created with `automark`:
 
 ![DiffHighlight](https://raw.github.com/chrisparnin/automark/master/Doc/DiffHighlight.png)
 
+See the full example of a [blog post created with automark](http://chrisparnin.github.io/articles/2013/10/creating-a-visual-studio-extension-shim-for-automark/).
+
 ### Features
 
 Automark is designed to support *episodic review*, a cognitive process for 
