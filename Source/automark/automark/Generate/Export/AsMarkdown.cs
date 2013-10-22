@@ -69,6 +69,16 @@ namespace automark.Generate.Export
                     w.WriteLine();
                     foreach (var hunk in fileDiff.Hunks)
                     {
+                        // default filter: skip hunks with trival newline addition / deletions.
+                        if (hunk.DiffLines
+                            .Where( l => l.Trim().StartsWith("+" ) )
+                            .All(l => l.Trim() == "+") && hunk.IsAddition)
+                            continue;
+                        if (hunk.DiffLines
+                            .Where( l => l.Trim().StartsWith("-" ) )
+                            .All(l => l.Trim() == "-") && hunk.IsDeletion)
+                            continue;
+
                         foreach (var line in hunk.DiffLines)
                         {
                             // http://stackoverflow.com/questions/8301207/microsoft-ides-source-file-encodings-boms-and-the-unicode-character-ufeff

@@ -96,7 +96,7 @@
         <Icon guid="guidImages" id="bmpPic2" />
         <Strings>
           <CommandName>cmdidAutomarkReverse</CommandName>
-          <ButtonText>Generate markdown (newest first)</ButtonText>
+          <ButtonText>Generate markdown (oldest first)</ButtonText>
         </Strings>
       </Button>
 
@@ -114,7 +114,7 @@
         <Icon guid="guidImages" id="bmpPic4" />
         <Strings>
           <CommandName>cmdidAutomarkHtml</CommandName>
-          <ButtonText>Generate html (newest first)</ButtonText>
+          <ButtonText>Generate html (oldest first)</ButtonText>
         </Strings>
       </Button>
 
