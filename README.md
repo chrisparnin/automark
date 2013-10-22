@@ -15,8 +15,15 @@ It is available as a [Visual Studio extension](http://visualstudiogallery.msdn.m
 ### Motivation
 
 Developers commonly blog about how-to tasks and development experiences in programming.
-But not everyone blogs, and the ones that do often spend several hours recalling, formatting, and crafting a blog post. The goal of automark is to 1) reduce the friction associated with blogging, 2) make it more habitual, and 
-3) allow developers to focus on the narrative of a blog post.
+But not everyone blogs, and the ones that do often spend several hours recalling, formatting, and crafting a blog post. The goal of automark is to 
+
+1. reduce the friction associated with blogging, 
+2. make it more habitual, and 
+3. allow developers to focus on the narrative of a blog post.
+
+Example output created with `automark`:
+
+![DiffHighlight](https://raw.github.com/chrisparnin/automark/master/Doc/DiffHighlight.png)
 
 ### Features
 
@@ -30,7 +37,6 @@ To support this, automark can
 - include additional references, such as visited Stack Overflow questions or official documentation pages used.
 - generate markdown or html
 
-![DiffHighlight](https://raw.github.com/chrisparnin/automark/master/Doc/DiffHighlight.png)
 
 ### Using automark
 
@@ -38,7 +44,7 @@ To use automark, first ensure that [autogit](https://github.com/chrisparnin/auto
 
 ![Menu](https://raw.github.com/chrisparnin/automark/master/Doc/menu.png)
 
-To generate a markdown representation of the recent coding task, select Tools -> automark -> Generate Markdown.  This will generate a markdown file stored in `$SolutionFolder\.HistoryData\md\timestamp` and then open it in an markdown editor.  For windows, I recommend using [Markdown Pro](http://www.markdownpro.com/).  From here, the markdown can be annotated and further later generated as a html.
+To generate a markdown representation of the recent coding task, select Tools -> automark -> Generate Markdown.  This will generate a markdown file stored in `$SolutionFolder\.HistoryData\md\Timestamp.md` and then open it in an markdown editor.  For windows, I recommend using [Markdown Pro](http://www.markdownpro.com/).  From here, the markdown can be annotated and further later generated as a html.
 
 ![Markdown](https://raw.github.com/chrisparnin/automark/master/Doc/markdown.png)
 
