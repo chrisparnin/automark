@@ -37,7 +37,7 @@ namespace automark
             var diffParser = new GitDiffParser();
             var commits = parser.Parse(output);
 
-            Console.WriteLine(commits.Count);
+            //Console.WriteLine(commits.Count);
             foreach (var commit in commits)
             {
                 commit.UnifiedDiff = GitCommands.ShowSha(path, commit.Sha);
