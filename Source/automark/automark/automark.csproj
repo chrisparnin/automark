@@ -73,7 +73,9 @@
     <Compile Include="Util\NativeMethods.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <PropertyGroup>
     <SQLNativeBinariesDirectory>$(MSBuildProjectDirectory)\..\lib\SQLite.Native</SQLNativeBinariesDirectory>

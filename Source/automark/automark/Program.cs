@@ -17,7 +17,9 @@ namespace automark
         static void Main(string[] args)
         {
             string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autogit");
-            path = @"C:\dev\github\automark\Source\automark\.HistoryData\LocalHistory";
+            //path = @"C:\dev\github\automark\Source\automark\.HistoryData\LocalHistory";
+            //fatal: bad default revision 'HEAD'
+            path = @"C:\Users\Chris\Downloads\HistoryData\.HistoryData\LocalHistory";
             var reverse = false;
             var html = false;
             if (args.Length > 0)
@@ -32,6 +34,10 @@ namespace automark
             }
 
             var output = GitCommands.ListShaWithFiles(path);
+            if (output == "")
+            {
+                Console.Error.WriteLine("There are no commits to report yet.");
+            }
 
             var parser = new ParseGitLog();
             var diffParser = new GitDiffParser();
