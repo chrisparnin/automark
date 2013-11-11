@@ -46,6 +46,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -59,15 +60,25 @@
     <Compile Include="Generate\Export\AsMarkdown.cs" />
     <Compile Include="Generate\Export\AsMarkdownHtml.cs" />
     <Compile Include="Git\GitDiffParser.cs" />
-    <Compile Include="Models\GitCommit.cs" />
-    <Compile Include="Models\GitFileDiff.cs" />
-    <Compile Include="Models\GitFileStatus.cs" />
-    <Compile Include="Models\HunkRange.cs" />
-    <Compile Include="Models\HunkRangeInfo.cs" />
-    <Compile Include="Models\WebVisit.cs" />
+    <Compile Include="Git\UnifiedDiffToMyersDifference.cs" />
+    <Compile Include="Models\Diff\DIfference.cs" />
+    <Compile Include="Models\Diff\Difflet.cs" />
+    <Compile Include="Models\Diff\Span.cs" />
+    <Compile Include="Models\Git\GitCommit.cs" />
+    <Compile Include="Models\Git\GitFileDiff.cs" />
+    <Compile Include="Models\Git\GitFileStatus.cs" />
+    <Compile Include="Models\Git\HunkRange.cs" />
+    <Compile Include="Models\Git\HunkRangeInfo.cs" />
+    <Compile Include="Models\Markdown\ChangeHunk.cs" />
+    <Compile Include="Models\Markdown\FileChangeHunks.cs" />
+    <Compile Include="Models\Web\WebVisit.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transformations\Filters\FilterReverts.cs" />
+    <Compile Include="Transformations\Rewrite\MergeFixOnFix.cs" />
+    <Compile Include="Transformations\Rewrite\MergeTemporalFuzz.cs" />
     <Compile Include="Util\Config.cs" />
+    <Compile Include="Util\DiffMatchPatch.cs" />
     <Compile Include="Util\GitCommands.cs" />
     <Compile Include="Git\ParseGitLog.cs" />
     <Compile Include="Util\NativeMethods.cs" />
@@ -95,6 +106,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

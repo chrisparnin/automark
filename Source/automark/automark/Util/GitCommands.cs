@@ -51,7 +51,7 @@ namespace automark.Util
 
         public static string ShowSha(string path, string sha)
         {
-            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha));
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2} --ignore-all-space", path.Replace("\\", "/"), path.Replace("\\", "/"), sha));
             return output;
         }
 

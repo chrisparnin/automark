@@ -37,7 +37,9 @@ namespace automark.Git
                                         line.Item2, GetFileName(split)
                                         )
                     ).ToList();
-                list.Add(new FileDiff { Hunks = hunks });
+                list.Add(new FileDiff { Hunks = hunks, 
+                    MyerDiffs = UnifiedDiffToMyersDifference.DifferenceFromHunk(hunks).ToList()
+                });
             }
 
             foreach (var file in list)

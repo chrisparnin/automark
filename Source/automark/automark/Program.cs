@@ -8,6 +8,7 @@ using automark.Connections.Browser;
 using automark.Generate.Export;
 using automark.Git;
 using automark.Models;
+using automark.Transformations.Rewrite;
 using automark.Util;
 
 namespace automark
@@ -17,9 +18,10 @@ namespace automark
         static void Main(string[] args)
         {
             string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autogit");
-            //path = @"C:\dev\github\automark\Source\automark\.HistoryData\LocalHistory";
+            //path = @"C:\DEV\github\automark\Source\Extensions\automark.VisualStudio\.HistoryData\LocalHistory";
+            path = @"C:\dev\github\automark\Source\automark\.HistoryData\LocalHistory";
             //fatal: bad default revision 'HEAD'
-            path = @"C:\Users\Chris\Downloads\HistoryData\.HistoryData\LocalHistory";
+            //path = @"C:\Users\Chris\Downloads\HistoryData\.HistoryData\LocalHistory";
             var reverse = false;
             var html = false;
             if (args.Length > 0)
@@ -65,6 +67,46 @@ namespace automark
                 //commit.Print();
             }
 
+            // Transformations
+            var newCommits = new List<GitCommit>();
+
+            try
+            {
+                var fixOnFix = new MergeFixOnFix();
+                var lastCommit = commits.FirstOrDefault();
+
+                foreach (var commit in commits.Skip(1))
+                {
+                    if( commit.Difflets.Count > 0 && lastCommit.Difflets.Count > 0 )
+                    {
+                        var newBlock = fixOnFix.Apply(commit.Difflets[0], lastCommit.Difflets[0]);
+                        if (newBlock != null)
+                        {
+                            commit.Difflets[0] = newBlock;
+                        }
+                        else
+                        {
+                            newCommits.Add(lastCommit);
+                        }
+                    }
+                    else
+                    {
+                        newCommits.Add(lastCommit);
+                    }
+                    lastCommit = commit;
+                }
+                if (lastCommit != null)
+                {
+                    newCommits.Add(lastCommit);
+                }
+
+                commits = newCommits;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message); // test fix on fix
+            }
+
             var connector = new ChromeHistory();
             var firefox = new FirefoxConnector();
 
@@ -103,12 +145,15 @@ namespace automark
             else 
             {
                 var formatter = new AsMarkdown();
-                Console.WriteLine(formatter.Export(commits));            
+                Console.WriteLine(formatter.Export(commits, args.Length == 0));            
             }
 
             //var html = new AsMarkdownHtml();
             //Console.WriteLine(html.Export(commits));
-
+            if (args.Length == 0)
+            {
+                Console.ReadKey();
+            }
         }
 
         private static List<WebVisit> GetWebVisits(SqlLiteConnector connector, string dbPath, string tempName)

@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using automark.Git;
 using automark.Models;
 
 namespace automark.Generate.Export
 {
     public class AsMarkdown
     {
-        public string Export(List<GitCommit> commits)
+        public string Export(List<GitCommit> commits, bool debug)
         {
             if (!commits.Any())
                 return "";
@@ -23,6 +25,8 @@ namespace automark.Generate.Export
             {
                 w.WriteLine(EmitDate(commits.First().CommitTimeStamp));
             }
+
+            var diffEngine = new DiffMatchPatch.diff_match_patch();
 
             GitCommit previousCommit = null;
             foreach (var commit in commits)
@@ -88,6 +92,34 @@ namespace automark.Generate.Export
 
                             w.WriteLine("    {0}", line.TrimEnd() );
                         }
+                   }
+                    // test space
+                    if (debug) 
+                    {
+                        w.WriteLine("##### Myers Version");
+                        var diffs = fileDiff.MyerDiffs;
+                        foreach (var diff in diffs)
+                        {
+                            w.WriteLine("Type {0} Left {1}:{2} Right {3}:{4}", diff.DifferenceType,
+                                diff.Left.Start, diff.Left.End, diff.Right.Start, diff.Right.End);
+
+                            if (diff.DifferenceType == Models.Diff.DifferenceType.Change &&
+                                diff.Left.Length == diff.Right.Length)
+                            {
+                                w.WriteLine();
+                                for (var i = 0; i < diff.Left.Length; i++)
+                                {
+                                    var left = diff.Left.TextLines[i];
+                                    var right = diff.Right.TextLines[i];
+
+                                    var innerDiffs = diffEngine.diff_main(left, right, false);
+                                    diffEngine.Diff_Timeout = 0;
+                                    diffEngine.diff_cleanupSemantic(innerDiffs);
+
+                                    w.WriteLine(string.Join(",", innerDiffs.Where(d => d.operation != DiffMatchPatch.Operation.EQUAL).Select(d => d.text)));
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -130,7 +162,7 @@ namespace automark.Generate.Export
         {
             using (TextWriter writer = File.CreateText(outputPath))
             {
-                writer.Write(Export(commits));
+                writer.Write(Export(commits, false));
             }
         }
     }

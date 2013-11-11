@@ -21,5 +21,7 @@ namespace automark.Models
         public string[] BeforeTextLines { get; set; }
 
         public string[] AfterTextLines { get; set; }
+
+        public List<Diff.Difference> MyerDiffs { get; set; }
     }
 }

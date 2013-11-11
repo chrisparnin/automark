@@ -15,7 +15,7 @@ namespace automark.Generate.Export
         public string Export(List<GitCommit> commits)
         {
             AsMarkdown formatter = new AsMarkdown();
-            var markdown = formatter.Export(commits);
+            var markdown = formatter.Export(commits, false);
 
             var markdown2Html = new Markdown();
             //markdown2Html.EncodeProblemUrlCharacters = true;
