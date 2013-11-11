@@ -584,6 +584,24 @@ table tr:nth-child(2n) {
             $(document).ready(function () {
                 $("pre").addClass("prettyprint");
 
+                // Collapse regions by default (except last X)
+                $(".section").each(function () {
+                    collapseSection($(this));
+                });
+
+                // Collapsible toggle logic
+                $(".section").click(function () {
+                    if ($(this).nextUntil('.section,h2').is(":hidden")) {
+                        $(this).nextUntil('.section,h2').slideDown("slow");
+
+                        $(this).children('div').text("");
+                    }
+                    else {
+                        collapseSection($(this));
+                    }
+                });
+
+                // pretty printing.
                 prettyPrint(function () {
 
                     // If don't wait for prettyprint, funky highlighting.
@@ -609,6 +627,23 @@ table tr:nth-child(2n) {
 
 
             });
+
+            function collapseSection(section) {
+                section.nextUntil('.section,h2').slideUp("slow");
+                var count = section.nextUntil('.section,h2').filter('pre').length;
+
+                if (count > 0) {
+                    var preview = section.nextUntil('.section,h2').filter('pre').first().html();
+                    section.children('div').first().html(
+                      "<pre>" + preview + "</pre>");
+                }
+                if (count - 1 > 0) {
+                    section.children('.summary').html(
+                      "<strong>" + (count - 1) +
+                      " more commits... </strong>"
+                    );
+                }
+            }
 
             //var diff_match_patch=require("googlediff");
             diffEngine = new diff_match_patch();

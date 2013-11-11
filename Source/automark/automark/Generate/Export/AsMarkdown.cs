@@ -29,17 +29,22 @@ namespace automark.Generate.Export
             var diffEngine = new DiffMatchPatch.diff_match_patch();
 
             GitCommit previousCommit = null;
+
+            bool isFirstCommit = true;
             foreach (var commit in commits)
             {
                 var span = TimeSinceLastCommit(commit, previousCommit);
-                // commit for files not yet in repository, skip.
-                // in future can be smarter with this with tags, etc.
-                if (commit.Message.Contains("pre save"))
-                    continue;
 
-                if (span != TimeSpan.MaxValue && span.TotalDays >= 1)
+                if (span != TimeSpan.MaxValue && !IsCommitOnSameDay(commit, previousCommit))
                 {
                     w.WriteLine(EmitDate(commit.CommitTimeStamp));
+                }
+
+                if (isFirstCommit || (span != TimeSpan.MaxValue && span.TotalHours > 2) || !IsCommitOnSameDay(commit, previousCommit))
+                {
+                    w.WriteLine("");
+                    w.WriteLine(string.Format("<div class='section'>{0}<div></div><div class='summary'></div></div>", EmitTime(commit.CommitTimeStamp)));
+                    isFirstCommit = false;
                 }
                 // Sunday, October 6 2013
                 // 10:44 AM
@@ -126,6 +131,7 @@ namespace automark.Generate.Export
                 previousCommit = commit;
 
             }
+
             return w.ToString();
         }
 
@@ -138,8 +144,8 @@ namespace automark.Generate.Export
             //Thread.CurrentThread.CurrentUICulture = new CultureInfo("sv-SE");
 
             if (System.Globalization.CultureInfo.CurrentUICulture.Name == "sv-SE")
-                return string.Format("### {0:HH:mm}</p>", date);
-            return string.Format("### {0:hh:mm tt}</p>", date);
+                return string.Format("{0:HH:mm}", date);
+            return string.Format("{0:hh:mm tt}", date);
         }
 
         private string EmitDate(DateTime date)
@@ -157,6 +163,15 @@ namespace automark.Generate.Export
             return (currentDate - previousDate).Duration();
         }
 
+        public bool IsCommitOnSameDay(GitCommit current, GitCommit previous)
+        {
+            if (previous == null || current == null)
+                return true;
+            var currentDate = current.CommitTimeStamp;
+            var previousDate = previous.CommitTimeStamp;
+
+            return currentDate.DayOfWeek == previousDate.DayOfWeek;
+        }
 
         public void ExportToFile(List<GitCommit> commits, string outputPath)
         {

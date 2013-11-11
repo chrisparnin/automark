@@ -18,8 +18,8 @@ namespace automark
         static void Main(string[] args)
         {
             string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autogit");
-            //path = @"C:\DEV\github\automark\Source\Extensions\automark.VisualStudio\.HistoryData\LocalHistory";
-            path = @"C:\dev\github\automark\Source\automark\.HistoryData\LocalHistory";
+            path = @"C:\DEV\github\automark\Source\Extensions\automark.VisualStudio\.HistoryData\LocalHistory";
+            //path = @"C:\dev\github\automark\Source\automark\.HistoryData\LocalHistory";
             //fatal: bad default revision 'HEAD'
             //path = @"C:\Users\Chris\Downloads\HistoryData\.HistoryData\LocalHistory";
             var reverse = false;
@@ -45,7 +45,10 @@ namespace automark
             var diffParser = new GitDiffParser();
             var commits = parser.Parse(output);
 
-            //Console.WriteLine(commits.Count);
+            // commit for files not yet in repository, skip.
+            // in future can be smarter with this with tags, etc.
+            commits = commits.Where(c => !c.Message.Contains("pre save")).ToList();
+
             foreach (var commit in commits)
             {
                 commit.UnifiedDiff = GitCommands.ShowSha(path, commit.Sha);
@@ -66,6 +69,10 @@ namespace automark
 
                 //commit.Print();
             }
+            //////////////////
+            // CUSTOM FILTERS
+            //////////////////
+            commits = commits.Where(c => c.Difflets.Count > 0 && !c.Difflets[0].FileName.EndsWith(".csproj")).ToList();
 
             // Transformations
             var newCommits = new List<GitCommit>();
