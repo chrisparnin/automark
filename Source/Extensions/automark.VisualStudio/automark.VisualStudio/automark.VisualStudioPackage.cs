@@ -208,7 +208,7 @@ namespace ninlabs.automark.VisualStudio
             if (error.Trim().Length > 0)
             {
                 ShowMessage("automark", error);
-                return;
+                //return;
             }
 
              

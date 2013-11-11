@@ -270,66 +270,119 @@ table tr:nth-child(2n) {
 .markdown-body img {
   max-width: 100%
 }
-        </style>
-        <style>
-        del {
-          background-color: #fdd;
-          text-decoration: none;
-          color:#000 !important;
-        }
+</style>
+<style>
 
-        ins {
-          background-color: #dfd;
-          text-decoration: none;
-          color:#000 !important;
-        }
+/* Start by setting display:none to make this hidden.
+Then we position it in relation to the viewport window
+with position:fixed. Width, height, top and left speak
+speak for themselves. Background we set to 80% white with
+our animation centered, and no-repeating */
+.modal {
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 ) 
+                50% 50% 
+                no-repeat;
+}
 
-        del .inner
-        {
-          background-color: #faa;
-          text-decoration: none;
-        }
+.modal .msg
+{
+    background: #DDD;
+    position:absolute;
+    width:300px;
+    height:300px;
+    z-index:15;
+    top:50%;
+    left:50%;
+    margin:-150px 0 0 -150px;
+}
 
-        ins .inner
-        {
-          background-color: #afa;
-          text-decoration: none;
-        }
+.modal .msg span
+{
+  text-align: center;
+  vertical-align: middle;
+  line-height: 300px;
+  font-weight: bold;
+  margin-left:5px;
+  overflow: visible;
+}
 
-        .divider {
-          display: block;
-          width:90px;
-          min-height: 1em;
-          margin-left: 55px;
-          margin-top:.5em;
-          margin-bottom:.5em;
-          border-left: 1px solid gray;
-        }
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading {
+    overflow: hidden;   
+}
 
-        .pln{color:#000}
-        @media screen{
-        .str{color:#D14}
-        /*.str{color:#A31515}*/
-        .kwd{color:#0000FF}
-        .com{color:#93a1a1}
-        .typ{color:teal}
-        .lit{color:#195f91}
-        .pun,.opn,.clo{color:#660}.tag{color:#008}.atn{color:#606}
-        .atv{color:#D14}.dec,.var{color:#606}
-        .fun{color:red}
-        }
-        @media print,projection{
-        .str{color:#D14}
-        .kwd{color:#A0F078;font-weight:bold}.com{color:#93a1a1;font-style:italic}
-        .typ{color:teal;font-weight:bold}.lit{color:#195f91}.pun,.opn,.clo{color:#440}
-        .tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#D14}
-        }
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modal {
+    display: block;
+}
 
-        pre.prettyprint{padding:2px;border:1px solid #ccc}
-        ol.linenums{margin-top:0;margin-bottom:0}
-        li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8
-        li.L1,li.L3,li.L5,li.L7,li.L9{background:#fff}
-        </style>
+    del {
+        background-color: #fdd;
+        text-decoration: none;
+        color:#000 !important;
+    }
+
+    ins {
+        background-color: #dfd;
+        text-decoration: none;
+        color:#000 !important;
+    }
+
+    del .inner
+    {
+        background-color: #faa;
+        text-decoration: none;
+    }
+
+    ins .inner
+    {
+        background-color: #afa;
+        text-decoration: none;
+    }
+
+    .divider {
+        display: block;
+        width:90px;
+        min-height: 1em;
+        margin-left: 55px;
+        margin-top:.5em;
+        margin-bottom:.5em;
+        border-left: 1px solid gray;
+    }
+
+    .pln{color:#000}
+    @media screen{
+    .str{color:#D14}
+    /*.str{color:#A31515}*/
+    .kwd{color:#0000FF}
+    .com{color:#93a1a1}
+    .typ{color:teal}
+    .lit{color:#195f91}
+    .pun,.opn,.clo{color:#660}.tag{color:#008}.atn{color:#606}
+    .atv{color:#D14}.dec,.var{color:#606}
+    .fun{color:red}
+    }
+    @media print,projection{
+    .str{color:#D14}
+    .kwd{color:#A0F078;font-weight:bold}.com{color:#93a1a1;font-style:italic}
+    .typ{color:teal;font-weight:bold}.lit{color:#195f91}.pun,.opn,.clo{color:#440}
+    .tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#D14}
+    }
+
+    pre.prettyprint{padding:2px;border:1px solid #ccc}
+    ol.linenums{margin-top:0;margin-bottom:0}
+    li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8
+    li.L1,li.L3,li.L5,li.L7,li.L9{background:#fff}
+    </style>
 <!-- jQUERY -->
 
 <script>
@@ -583,31 +636,13 @@ table tr:nth-child(2n) {
         <script>
             $(document).ready(function () {
                 $("pre").addClass("prettyprint");
-
-                // Collapse regions by default (except last X)
-                $(".section").each(function () {
-                    collapseSection($(this));
-                });
-
-                // Collapsible toggle logic
-                $(".section").click(function () {
-                    if ($(this).nextUntil('.section,h2').is(":hidden")) {
-                        $(this).nextUntil('.section,h2').slideDown("slow");
-
-                        $(this).children('div').text("");
-                    }
-                    else {
-                        collapseSection($(this));
-                    }
-                });
+                $("body").addClass("loading");
 
                 // pretty printing.
                 prettyPrint(function () {
 
                     // If don't wait for prettyprint, funky highlighting.
                     $("code").each(function () {
-
-
 
                         var text = $(this).text();
                         text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/["]/g, "&quot;");
@@ -617,9 +652,28 @@ table tr:nth-child(2n) {
                         //this.innerHTML = formatUnifedDiff(text, html);
                         //this.innerHTML = formatUnifedDiff(text, html);
 
-
-
                     });
+
+                    // Collapsible toggle logic
+                    $(".section").click(function () {
+                        if ($(this).nextUntil('.section,h2').is(":hidden")) {
+                            $(this).nextUntil('.section,h2').not('.modal').slideDown("slow");
+
+                            $(this).children('div').text("");
+                        }
+                        else {
+                            collapseSection($(this));
+                        }
+
+                        $("body").removeClass("loading");
+                    });
+
+                    // Collapse regions by default (except last X)
+                    $(".section").each(function () {
+                        collapseSection($(this));
+                    });
+
+                    $("body").removeClass("loading");
                 },
                   document);
 
@@ -629,7 +683,7 @@ table tr:nth-child(2n) {
             });
 
             function collapseSection(section) {
-                section.nextUntil('.section,h2').slideUp("slow");
+                section.nextUntil('.section,h2').not('.modal').slideUp("slow");
                 var count = section.nextUntil('.section,h2').filter('pre').length;
 
                 if (count > 0) {

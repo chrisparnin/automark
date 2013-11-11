@@ -28,7 +28,9 @@ namespace automark.Generate.Export
             if (File.Exists(templatePath))
             {
                 var template = File.ReadAllText(templatePath);
-                var res = template + "<body>" + html + "</body></html>";
+                var res = template + "<body>" + html + 
+                    "<div class='modal'><div class='msg'><span>Loading...pretty printing...diff highlighting...</span></div></div>\n" +
+                    "</body></html>";
                 return res;
             }
             else
