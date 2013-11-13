@@ -141,15 +141,15 @@ namespace ninlabs.automark.VisualStudio
                 {
                     if (command.CommandID.ID == PkgCmdIDList.cmdidAutomarkReverse)
                     {
-                        flags = " -r";
+                        flags = " -r -fuzz";
                     }
                     if (command.CommandID.ID == PkgCmdIDList.cmdidAutomarkHtml)
                     {
-                        flags = " -html";
+                        flags = " -html -fuzz";
                     }
                     if (command.CommandID.ID == PkgCmdIDList.cmdidAutomarkHtmlReverse)
                     {
-                        flags = " -r -html";
+                        flags = " -r -html -fuzz";
                     }
                 }
                 RunAutomark(flags);

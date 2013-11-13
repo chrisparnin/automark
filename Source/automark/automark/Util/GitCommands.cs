@@ -48,6 +48,11 @@ namespace automark.Util
             return output;
         }
 
+        public static string ShowDiffRange(string path, string shaBefore, string shaAfter)
+        {
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" diff {2} {3} --ignore-all-space", path.Replace("\\", "/"), path.Replace("\\", "/"), shaBefore, shaAfter));
+            return output;
+        }
 
         public static string ShowSha(string path, string sha)
         {

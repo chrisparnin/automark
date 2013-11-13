@@ -24,6 +24,7 @@ namespace automark
             //path = @"C:\Users\Chris\Downloads\HistoryData\.HistoryData\LocalHistory";
             var reverse = false;
             var html = false;
+            var fuzz = false;
             if (args.Length > 0)
                 path = args[0];
             if (args.Any(a => a == "-r"))
@@ -33,6 +34,10 @@ namespace automark
             if (args.Any(a => a == "-html"))
             {
                 html = true;
+            }
+            if (args.Any(a => a == "-fuzz"))
+            {
+                fuzz = true;
             }
 
             var output = GitCommands.ListShaWithFiles(path);
@@ -57,18 +62,79 @@ namespace automark
                 if (commit.UnifiedDiff.Length > 500000)
                     continue;
 
-                commit.Difflets = diffParser.Parse(commit.UnifiedDiff);
-
-                foreach (var file in commit.Files)
-                {
-                    if( file.Status != "A" )
-                        file.BeforeText = GitCommands.ShowFileBeforeCommit(path, commit.Sha, file.File);
-                    if( file.Status != "D" )
-                        file.AfterText = GitCommands.ShowFileAfterCommit(path, commit.Sha, file.File);
-                }
+                ParseUnifiedDiff(path, diffParser, commit);
 
                 //commit.Print();
             }
+
+            // Temporal fuzz
+            if( fuzz )
+            {
+                var commitsToPrune = new List<GitCommit>();
+                // Do processing of commits in order, just easier on the brain...
+                var inOrderCommits = commits.ToList();
+                inOrderCommits.Reverse();
+
+                var prevCommit = inOrderCommits.FirstOrDefault();
+                var accumalatedDifference = new TimeSpan();
+                var startOfFuzz = prevCommit;
+                var endOfFuzz = prevCommit;
+                foreach (var commit in inOrderCommits.Skip(1))
+                {
+                    var lastTime = ParseGitLog.GetDateFromGitFormat(prevCommit.Headers["Date"]);
+                    var commitTime = ParseGitLog.GetDateFromGitFormat(commit.Headers["Date"]);
+                    var span = (lastTime - commitTime).Duration();
+                    accumalatedDifference += span;
+                    if (accumalatedDifference.TotalMinutes <= 3 && 
+                        prevCommit.Files.All(f => commit.Files.Select(c => c.File).Contains(f.File)) && 
+                        prevCommit.Files.Any( f => f.Status != "A" || f.Status != "D" ) )
+                    {
+                        commitsToPrune.Add(prevCommit);
+                        endOfFuzz = commit;
+                    }
+                    else
+                    {
+                        // endOfFuzz will be only surviving commit in range, others will be pruned.  
+                        // Get a new unified diff, and then reparse.
+                        if (startOfFuzz != endOfFuzz)
+                        {
+                            try
+                            {
+                                endOfFuzz.UnifiedDiff = GitCommands.ShowDiffRange(path, startOfFuzz.Sha + "~1", endOfFuzz.Sha);
+                                ParseUnifiedDiff(path, diffParser, endOfFuzz);
+                            }
+                            catch (Exception ex)
+                            {
+                                Trace.WriteLine(ex.Message);
+                            }
+                        }
+                        accumalatedDifference = new TimeSpan();
+                        startOfFuzz = commit;
+                        endOfFuzz = commit;
+                    }
+
+                    prevCommit = commit;
+                }
+
+                if (startOfFuzz != endOfFuzz)
+                {
+                    try
+                    {
+                        endOfFuzz.UnifiedDiff = GitCommands.ShowDiffRange(path, startOfFuzz.Sha + "~1", endOfFuzz.Sha);
+                        ParseUnifiedDiff(path, diffParser, endOfFuzz);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(ex.Message);
+                    }
+                }
+
+                foreach (var commitToRemove in commitsToPrune)
+                {
+                    commits.Remove(commitToRemove);
+                }
+            }
+
             //////////////////
             // CUSTOM FILTERS
             //////////////////
@@ -160,6 +226,19 @@ namespace automark
             if (args.Length == 0)
             {
                 Console.ReadKey();
+            }
+        }
+
+        private static void ParseUnifiedDiff(string path, GitDiffParser diffParser, GitCommit commit)
+        {
+            commit.Difflets = diffParser.Parse(commit.UnifiedDiff);
+
+            foreach (var file in commit.Files)
+            {
+                if (file.Status != "A")
+                    file.BeforeText = GitCommands.ShowFileBeforeCommit(path, commit.Sha, file.File);
+                if (file.Status != "D")
+                    file.AfterText = GitCommands.ShowFileAfterCommit(path, commit.Sha, file.File);
             }
         }
 

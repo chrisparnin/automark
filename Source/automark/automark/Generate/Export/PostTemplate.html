@@ -656,7 +656,7 @@ body.loading .modal {
 
                     // Collapsible toggle logic
                     $(".section").click(function () {
-                        if ($(this).nextUntil('.section,h2').is(":hidden")) {
+                        if ($(this).nextUntil('.section,h2').not('.modal').is(":hidden")) {
                             $(this).nextUntil('.section,h2').not('.modal').slideDown("slow");
 
                             $(this).children('div').text("");
