@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using automark.Connections.Browser;
 using automark.Generate.Export;
@@ -17,6 +19,8 @@ namespace automark
     {
         static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autogit");
             path = @"C:\DEV\github\automark\Source\Extensions\automark.VisualStudio\.HistoryData\LocalHistory";
             //path = @"C:\dev\github\automark\Source\automark\.HistoryData\LocalHistory";
@@ -140,6 +144,25 @@ namespace automark
             //////////////////
             commits = commits.Where(c => c.Difflets.Count > 0 && !c.Difflets[0].FileName.EndsWith(".csproj")).ToList();
 
+            // Remove hunks that are only from newline.
+            foreach (var commit in commits)
+            {
+                foreach (var fileDiff in commit.Difflets)
+                {
+                    fileDiff.Hunks = fileDiff.Hunks.Where( hunk =>
+                        !(hunk.DiffLines
+                            .Where(l => l.Trim().StartsWith("+"))
+                            .All(l => l.Trim() == "+") && hunk.IsAddition)
+                        &&
+                        !(hunk.DiffLines
+                            .Where(l => l.Trim().StartsWith("-"))
+                            .All(l => l.Trim() == "-") && hunk.IsDeletion)
+                    ).ToList();
+                }
+            }
+            // Remove commits that now have 0 hunks.
+            commits = commits.Where(c => c.Difflets.All(f => f.Hunks.Count > 0)).ToList();
+
             // Transformations
             var newCommits = new List<GitCommit>();
 
@@ -225,6 +248,11 @@ namespace automark
             //Console.WriteLine(html.Export(commits));
             if (args.Length == 0)
             {
+                Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("sv-SE");
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo("sv-SE");
+
+                Console.WriteLine(string.Format("## {0:dddd, MMMM dd, yyyy}\u00e5", DateTime.Now.AddDays(-2)));
+
                 Console.ReadKey();
             }
         }

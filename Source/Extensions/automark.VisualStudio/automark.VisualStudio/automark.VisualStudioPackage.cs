@@ -184,6 +184,7 @@ namespace ninlabs.automark.VisualStudio
             startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             startInfo.RedirectStandardOutput = true;
             startInfo.RedirectStandardError = true;
+            startInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
             startInfo.UseShellExecute = false;
             startInfo.FileName = executable;
             startInfo.Arguments = '"' + m_localHistoryPath + '"' + flags;
