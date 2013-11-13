@@ -21,9 +21,14 @@ namespace automark.Generate.Export
 
             StringWriter w = new StringWriter();
 
-            if( commits.Any() )
+            if (commits.Any())
             {
                 w.WriteLine(EmitDate(commits.First().CommitTimeStamp));
+            }
+            else
+            {
+                w.WriteLine("### No commits!");
+                w.WriteLine("Please make sure that *autogit* is properly saving changes in your solution directory in the hidden folder `.HistoryData/LocalHistory`");
             }
 
             var diffEngine = new DiffMatchPatch.diff_match_patch();
