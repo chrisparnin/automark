@@ -11,6 +11,8 @@ namespace ninlabs.automark.VisualStudio
         public const uint cmdidAutomarkHtml = 0x0302;
         public const uint cmdidAutomarkHtmlReverse = 0x0303;
 
+        public const uint cmdidExport = 0x304;
+
         public const uint cmdidAutomarkWindow =    0x101;
 
     };

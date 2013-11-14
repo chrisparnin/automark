@@ -46,6 +46,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -64,6 +65,7 @@
     <Compile Include="Models\Diff\DIfference.cs" />
     <Compile Include="Models\Diff\Difflet.cs" />
     <Compile Include="Models\Diff\Span.cs" />
+    <Compile Include="Models\Export.cs" />
     <Compile Include="Models\Git\GitCommit.cs" />
     <Compile Include="Models\Git\GitFileDiff.cs" />
     <Compile Include="Models\Git\GitFileStatus.cs" />

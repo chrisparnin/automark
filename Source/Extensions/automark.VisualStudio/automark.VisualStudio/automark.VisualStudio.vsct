@@ -118,6 +118,14 @@
         </Strings>
       </Button>
 
+      <Button guid="guidautomark.VisualStudioCmdSet" id="cmdidExport" priority="0x0800" type="Button">
+        <Parent guid="guidautomark.VisualStudioCmdSet" id="AutomarkSubMenuGroupHtml" />
+        <Icon guid="guidImages" id="bmpPic4" />
+        <Strings>
+          <CommandName>cmdidExport</CommandName>
+          <ButtonText>Export</ButtonText>
+        </Strings>
+      </Button>
 
 
 
@@ -169,6 +177,8 @@
       <IDSymbol name="cmdidAutomarkReverse" value="0x0301" />
       <IDSymbol name="cmdidAutomarkHtml" value="0x0302" />
       <IDSymbol name="cmdidAutomarkHtmlReverse" value="0x0303" />
+
+      <IDSymbol name="cmdidExport" value="0x0304" />
 
 
     </GuidSymbol>

@@ -141,6 +141,7 @@
       <DependentUpon>MyControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\ToolWindows\MyToolWindow.cs" />
+    <Compile Include="Util\Zip.cs" />
     <Compile Include="VSIX\Guids.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>

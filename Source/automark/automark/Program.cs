@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +31,7 @@ namespace automark
             var reverse = false;
             var html = false;
             var fuzz = false;
+            var export = false;
             if (args.Length > 0)
                 path = args[0];
             if (args.Any(a => a == "-r"))
@@ -42,6 +45,10 @@ namespace automark
             if (args.Any(a => a == "-fuzz"))
             {
                 fuzz = true;
+            }
+            if (args.Any(a => a == "-export"))
+            {
+                export = true;
             }
 
             var output = GitCommands.ListShaWithFiles(path);
@@ -58,6 +65,12 @@ namespace automark
             // in future can be smarter with this with tags, etc.
             commits = commits.Where(c => !c.Message.Contains("pre save")).ToList();
 
+            if (export )
+            {
+                ExportHistory(path, output, commits);
+                return;
+            }
+
             foreach (var commit in commits)
             {
                 commit.UnifiedDiff = GitCommands.ShowSha(path, commit.Sha);
@@ -69,7 +82,7 @@ namespace automark
                 ParseUnifiedDiff(path, diffParser, commit);
 
                 //commit.Print();
-            }
+            }            
 
             // Temporal fuzz
             if( fuzz )
@@ -163,6 +176,125 @@ namespace automark
             // Remove commits that now have 0 hunks.
             commits = commits.Where(c => c.Difflets.All(f => f.Hunks.Count > 0)).ToList();
 
+            //commits = FixOnFix(commits);
+            CodeWebHistory(commits);
+
+            if (reverse)
+            {
+                commits.Reverse();
+            }
+            if (html)
+            {
+                var formatter = new AsMarkdownHtml();
+                Console.WriteLine(formatter.Export(commits));
+            }
+            else 
+            {
+                var formatter = new AsMarkdown();
+                Console.WriteLine(formatter.Export(commits, args.Length == 0));            
+            }
+
+            //var html = new AsMarkdownHtml();
+            //Console.WriteLine(html.Export(commits));
+            if (args.Length == 0)
+            {
+                Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("sv-SE");
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo("sv-SE");
+
+                Console.WriteLine(string.Format("## {0:dddd, MMMM dd, yyyy}\u00e5", DateTime.Now.AddDays(-2)));
+
+                Console.ReadKey();
+            }
+        }
+
+        private static void ExportHistory(string path, string output, List<GitCommit> commits)
+        {
+            var exportContract = new Export();
+            exportContract.Error = "";
+            try
+            {
+                exportContract.ListShas = output;
+                exportContract.UnifiedDiffs = commits.Select(c => c.UnifiedDiff).ToList();
+
+                // ".HistoryData\usage.log"
+                var historyDataDir = System.IO.Path.GetDirectoryName(path);
+                var usageLogPath = System.IO.Path.Combine(historyDataDir, "usage.log");
+                exportContract.UsageLog = System.IO.File.ReadAllText(usageLogPath);
+
+                // ".HistoryData\html\*.html"
+                var htmlDir = System.IO.Path.Combine(historyDataDir, "html");
+                exportContract.GeneratedHtmlFiles = new List<string>();
+                if (System.IO.Directory.Exists(htmlDir))
+                {
+                    foreach (var file in System.IO.Directory.GetFiles(htmlDir))
+                    {
+                        exportContract.GeneratedHtmlFiles.Add(System.IO.File.ReadAllText(file));
+                    }
+                }
+
+                // ".HistoryData\md\*.md"
+                var mdDir = System.IO.Path.Combine(historyDataDir, "md");
+                exportContract.MarkdownFiles = new List<string>();
+                if (System.IO.Directory.Exists(mdDir))
+                {
+                    foreach (var file in System.IO.Directory.GetFiles(mdDir))
+                    {
+                        exportContract.MarkdownFiles.Add(System.IO.File.ReadAllText(file));
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                exportContract.Error = ex.Message;
+            }
+
+            // Serialize
+            using (MemoryStream memStm = new MemoryStream())
+            {
+                var serializer = new DataContractSerializer(typeof(Export));
+                serializer.WriteObject(memStm, exportContract);
+
+                memStm.Seek(0, SeekOrigin.Begin);
+                using (var streamReader = new StreamReader(memStm))
+                {
+                    string result = streamReader.ReadToEnd();
+                    Console.WriteLine(result);
+                }
+            }
+        }
+
+        private static void CodeWebHistory(List<GitCommit> commits)
+        {
+
+            var connector = new ChromeHistory();
+            var firefox = new FirefoxConnector();
+
+            //string dbPath = @"C:\Users\Chris\AppData\Local\Google\Chrome\User Data\Default\History";
+            string dbPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome\User Data\Default\History");
+
+            //string dbPath = @"\\psf\Home\Library\Application Support\Google\Chrome\Default\History"
+            var visits = GetWebVisits(connector, dbPath, "chromeTemp.db");
+
+            var fireFoxVisits = new List<WebVisit>();
+            if (firefox.FindDbPath() != null)
+                fireFoxVisits = GetWebVisits(firefox, firefox.FindDbPath(), "fireTemp.db");
+
+            var last = commits.FirstOrDefault();
+            foreach (var commit in commits.Skip(1))
+            {
+                var lastTime = ParseGitLog.GetDateFromGitFormat(last.Headers["Date"]);
+                var commitTime = ParseGitLog.GetDateFromGitFormat(commit.Headers["Date"]);
+
+                commit.Visits.AddRange(visits.Where(v => v.Timestamp < lastTime && v.Timestamp >= commitTime));
+                commit.Visits.AddRange(fireFoxVisits.Where(v => v.Timestamp < lastTime && v.Timestamp >= commitTime));
+
+                last = commit;
+            }
+        }
+
+        private static List<GitCommit> FixOnFix(List<GitCommit> commits)
+        {
             // Transformations
             var newCommits = new List<GitCommit>();
 
@@ -173,7 +305,7 @@ namespace automark
 
                 foreach (var commit in commits.Skip(1))
                 {
-                    if( commit.Difflets.Count > 0 && lastCommit.Difflets.Count > 0 )
+                    if (commit.Difflets.Count > 0 && lastCommit.Difflets.Count > 0)
                     {
                         var newBlock = fixOnFix.Apply(commit.Difflets[0], lastCommit.Difflets[0]);
                         if (newBlock != null)
@@ -202,59 +334,7 @@ namespace automark
             {
                 Trace.WriteLine(ex.Message); // test fix on fix
             }
-
-            var connector = new ChromeHistory();
-            var firefox = new FirefoxConnector();
-
-            //string dbPath = @"C:\Users\Chris\AppData\Local\Google\Chrome\User Data\Default\History";
-            string dbPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome\User Data\Default\History");
-
-            //string dbPath = @"\\psf\Home\Library\Application Support\Google\Chrome\Default\History"
-            var visits = GetWebVisits(connector, dbPath, "chromeTemp.db");
-           
-            var fireFoxVisits = new List<WebVisit>();
-            if( firefox.FindDbPath() != null )
-                fireFoxVisits = GetWebVisits(firefox, firefox.FindDbPath(), "fireTemp.db");
-
-            var last = commits.FirstOrDefault();
-            foreach (var commit in commits.Skip(1))
-            {
-                var lastTime = ParseGitLog.GetDateFromGitFormat(last.Headers["Date"]);
-                var commitTime = ParseGitLog.GetDateFromGitFormat(commit.Headers["Date"]);
-
-                commit.Visits.AddRange(visits.Where(v => v.Timestamp < lastTime && v.Timestamp >= commitTime));
-                commit.Visits.AddRange(fireFoxVisits.Where(v => v.Timestamp < lastTime && v.Timestamp >= commitTime));
-
-                last = commit;
-            }
-
-
-            if (reverse)
-            {
-                commits.Reverse();
-            }
-            if (html)
-            {
-                var formatter = new AsMarkdownHtml();
-                Console.WriteLine(formatter.Export(commits));
-            }
-            else 
-            {
-                var formatter = new AsMarkdown();
-                Console.WriteLine(formatter.Export(commits, args.Length == 0));            
-            }
-
-            //var html = new AsMarkdownHtml();
-            //Console.WriteLine(html.Export(commits));
-            if (args.Length == 0)
-            {
-                Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("sv-SE");
-                Thread.CurrentThread.CurrentUICulture = new CultureInfo("sv-SE");
-
-                Console.WriteLine(string.Format("## {0:dddd, MMMM dd, yyyy}\u00e5", DateTime.Now.AddDays(-2)));
-
-                Console.ReadKey();
-            }
+            return commits;
         }
 
         private static void ParseUnifiedDiff(string path, GitDiffParser diffParser, GitCommit commit)

@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Shell;
 using System.Reflection;
 using System.Text;
 using ninlabs.Ganji_History.Listeners;
+using ninlabs.automark.VisualStudio.Util;
 
 namespace ninlabs.automark.VisualStudio
 {
@@ -114,6 +115,10 @@ namespace ninlabs.automark.VisualStudio
                 menuItem = new MenuCommand(MenuItemCallback, menuCommandID);
                 mcs.AddCommand(menuItem);
 
+                // Create the command for the menu item.
+                menuCommandID = new CommandID(GuidList.guidautomarkVisualStudioCmdSet, (int)PkgCmdIDList.cmdidExport);
+                menuItem = new MenuCommand(MenuItemCallback, menuCommandID);
+                mcs.AddCommand(menuItem);
 
                 // Create the command for the tool window
                 CommandID toolwndCommandID = new CommandID(GuidList.guidautomarkVisualStudioCmdSet, (int)PkgCmdIDList.cmdidAutomarkWindow);
@@ -150,6 +155,12 @@ namespace ninlabs.automark.VisualStudio
                     if (command.CommandID.ID == PkgCmdIDList.cmdidAutomarkHtmlReverse)
                     {
                         flags = " -r -html -fuzz";
+                    }
+                    if (command.CommandID.ID == PkgCmdIDList.cmdidExport)
+                    {
+                        flags = " -export";
+                        Log.WriteMessage(string.Format("automarkexport;{0}", DateTime.Now));
+                        Log.Flush();
                     }
                 }
                 RunAutomark(flags);
@@ -226,9 +237,27 @@ namespace ninlabs.automark.VisualStudio
                 Log.WriteMessage(string.Format("automarkresult;{0};{1}", tempHtml, DateTime.Now));
                 System.Diagnostics.Process.Start(tempHtml);
             }
-            else 
+            else if (flags.Contains("-export"))
             {
-                string tempMD = System.IO.Path.Combine(m_basePath,"md",string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.md", DateTime.Now));
+                var time = DateTime.Now;
+                string tempExport = System.IO.Path.Combine(m_basePath, "exports", string.Format("export-{0:yyyy-MM-dd-hh-mm-tt}.export", time));
+                string tempExportZip = System.IO.Path.Combine(m_basePath, "exports", string.Format("export-{0:yyyy-MM-dd-hh-mm-tt}.zip", time));
+
+                var parent = System.IO.Path.GetDirectoryName(tempExport);
+                if (!System.IO.Directory.Exists(parent))
+                {
+                    System.IO.Directory.CreateDirectory(parent);
+                }
+
+                System.IO.File.WriteAllText(tempExport, builder.ToString());
+                Zip.ZipFile(tempExportZip, tempExport);
+
+                string msg = @"mailto:chris.parnin@gatech.edu&subject=Automark export&body=Please attach {0} and send.";
+                System.Diagnostics.Process.Start(string.Format(msg, tempExportZip));
+            }
+            else
+            {
+                string tempMD = System.IO.Path.Combine(m_basePath, "md", string.Format("automark-{0:yyyy-MM-dd-hh-mm-tt}.md", DateTime.Now));
                 var parent = System.IO.Path.GetDirectoryName(tempMD);
                 if (!System.IO.Directory.Exists(parent))
                 {
