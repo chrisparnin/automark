@@ -252,8 +252,31 @@ namespace ninlabs.automark.VisualStudio
                 System.IO.File.WriteAllText(tempExport, builder.ToString());
                 Zip.ZipFile(tempExportZip, tempExport);
 
-                string msg = @"mailto:chris.parnin@gatech.edu&subject=Automark export&body=Please attach {0} and send.";
-                System.Diagnostics.Process.Start(string.Format(msg, tempExportZip));
+                bool triedBackup = false;
+                try
+                {
+                    MapiMailMessage message = new MapiMailMessage("Automark export", "This information includes the automark usage log, timestamps of saves and diffs, and generated html and markdown files.  This usage info will help in testing and improving the tool. You can review the exported info in " + tempExport + "  \nThanks!");
+                    message.Recipients.Add("chris.parnin@gatech.edu");
+                    message.Files.Add(tempExportZip);
+                    message.OnDone += (success) =>
+                    {
+                        if (!success)
+                        {
+                            triedBackup = true;
+                            string msg = @"mailto:chris.parnin@gatech.edu&subject=Automark export&body=Please attach {0} and send.";
+                            System.Diagnostics.Process.Start(string.Format(msg, tempExportZip));
+                        }
+                    };
+                    message.ShowDialog();
+                }
+                catch (Exception ex)
+                {
+                    if (!triedBackup)
+                    {
+                        string msg = @"mailto:chris.parnin@gatech.edu&subject=Automark export&body=Please attach {0} and send.";
+                        System.Diagnostics.Process.Start(string.Format(msg, tempExportZip));
+                    }
+                }
             }
             else
             {
