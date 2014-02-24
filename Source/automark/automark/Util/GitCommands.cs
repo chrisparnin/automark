@@ -62,13 +62,13 @@ namespace automark.Util
 
         public static string ShowFileAfterCommit(string path, string sha, string file)
         {
-            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2}:{3}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha, file));
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2}:\"{3}\"", path.Replace("\\", "/"), path.Replace("\\", "/"), sha, file));
             return output;
         }
 
         public static string ShowFileBeforeCommit(string path, string sha, string file)
         {
-            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2}~1:{3}", path.Replace("\\", "/"), path.Replace("\\", "/"), sha, file));
+            var output = RunProcess(string.Format(" --git-dir=\"{0}/.git\" --work-tree=\"{1}\" show {2}~1:\"{3}\"", path.Replace("\\", "/"), path.Replace("\\", "/"), sha, file));
             return output;
         }
     }
