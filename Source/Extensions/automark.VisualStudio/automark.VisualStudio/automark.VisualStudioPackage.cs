@@ -399,7 +399,7 @@ namespace ninlabs.automark.VisualStudio
 
         public int OnQueryCloseSolution(object pUnkReserved, ref int pfCancel)
         {
-            throw new NotImplementedException();
+            return VSConstants.S_OK;
         }
 
         public int OnQueryUnloadProject(IVsHierarchy pRealHierarchy, ref int pfCancel)
